@@ -16,6 +16,9 @@ body.innerHTML = `
   </div>
 </div>`;
 
+body.innerHTML += '<div style="font-size:50px">Прямо сейчас я работаю над таском. <br> Проверьте, пожалуйста, чуть позже. </div>'
+
+
 const ROWS = document.querySelectorAll('.row');
 
 function init() {
@@ -123,8 +126,6 @@ document.addEventListener('keyup', function (event) {
     });
   };
 });
-
-body.innerHTML += '<div style="font-size:50px">Прямо сейчас я работаю над таском. <br> Проверьте, пожалуйста, чуть позже. </div>'
 
 
 // document.addEventListener('keydown', function(event) {
