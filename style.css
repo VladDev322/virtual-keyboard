@@ -64,6 +64,12 @@
   display: flex;
 }
 
+.info {
+  margin: 0;
+  margin-top: 10px;
+  font-size: 20px;
+}
+
 .Space,
 .Tab,
 .Delete,
