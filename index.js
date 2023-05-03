@@ -1,9 +1,5 @@
 import keys from './keys.mjs';
 
-// document.addEventListener('keypress', function (event) {
-//   console.log(event)
-// })
-
 const BODY = document.querySelector('body');
 BODY.innerHTML = `
 <div class="wrapper"> 
@@ -15,10 +11,9 @@ BODY.innerHTML = `
     <div class="row"></div>
     <div class="row"></div>
   </div>
+  <p class="info"> Клавиатура создана в операционной системе Windows </p>
+  <p class="info"> Для переключения языка комбинация:  ctrl + alt </p>
 </div>`;
-
-BODY.innerHTML += '<div style="font-size:50px">Прямо сейчас я работаю над таском. <br> Проверьте, пожалуйста, чуть позже. </div>'
-
 
 const ROWS = document.querySelectorAll('.row');
 
@@ -55,6 +50,7 @@ function init() {
 
 init();
 
+const specialKeysNames = ['Backspace', 'Tab', 'Delete', 'CapsLock', 'Enter', 'Shift', 'Ctrl', 'Win', 'Space', 'Alt'];
 const TEXTAREA = document.querySelector('.textarea');
 const KEYBOARD = document.querySelector('.keyboard');
 const ALL_KEYS = document.querySelectorAll('.key');
@@ -114,12 +110,45 @@ function caseCheck() {
   };
 };
 
+function addLetter() {
+  clickTarget = event.target.closest('.key');
+  let rusOrEng = clickTarget.querySelector('.rus:not(.hidden), .eng:not(.hidden)');
+  let clickedLetter = Array.from(rusOrEng.children).find(child => !child.classList.contains('hidden')).innerText;
+  let cursor = TEXTAREA.selectionStart;
+  let prev = TEXTAREA.value.slice(0, cursor)
+  let post = TEXTAREA.value.slice(cursor)
+  if (!specialKeysNames.includes(clickedLetter)) {
+    TEXTAREA.value = prev + clickedLetter + post;
+    TEXTAREA.selectionStart = prev.length + 1;
+    TEXTAREA.selectionEnd = prev.length + 1;
+  }
+  if (clickedLetter === '') {
+    TEXTAREA.value = prev + ' ' + post;
+    TEXTAREA.selectionStart = prev.length + 1;
+    TEXTAREA.selectionEnd = prev.length + 1;
+  } 
+  if (clickedLetter === 'Backspace') {
+    prev = TEXTAREA.value.slice(0, cursor - 1);
+    TEXTAREA.selectionStart = prev.length - 1;
+    TEXTAREA.selectionEnd = prev.length - 1;
+    TEXTAREA.value = prev + post;
+    console.log('back')
+  } 
+  if (clickedLetter === 'Tab') TEXTAREA.value += '    ';
+  if (clickedLetter === 'Enter') TEXTAREA.value += '\n';
+  if (clickTarget.classList.contains('CapsLock')) clickTarget.classList.toggle('active')
+  else clickTarget.classList.add('active');
+}
+
 
 document.addEventListener('keydown', function (event) {
   let key = document.querySelector(`.${event.code}`);
   if (key.classList.contains('CapsLock')) key.classList.toggle('active')
   else key.classList.add('active');
-  if (key.classList.contains('Tab')) event.preventDefault()
+  if (key.classList.contains('Tab') ||
+    key.classList.contains('AltLeft') ||
+    key.classList.contains('AltRight'))
+    event.preventDefault();
 
   TEXTAREA.focus();
 
@@ -148,37 +177,11 @@ document.addEventListener('keyup', function (event) {
   caseCheck();
 });
 
-const specialKeysNames = ['Backspace', 'Tab', 'Delete', 'CapsLock', 'Enter', 'Shift', 'Ctrl', 'Win', 'Space', 'Alt']
-let clickTarget;
 
+let clickTarget;
 KEYBOARD.addEventListener('mousedown', function (event) {
   if (event.target.closest('.key')) {
-    clickTarget = event.target.closest('.key');
-
-    let rusOrEng = clickTarget.querySelector('.rus:not(.hidden), .eng:not(.hidden)');
-    let clickedLetter = Array.from(rusOrEng.children).find(child => !child.classList.contains('hidden')).innerText;
-
-
-    // TODO : CURSOR 
-
-    // let cursor = TEXTAREA.selectionStart;
-    // let cursor2 = TEXTAREA.selectionEnd;
-    // if (!specialKeysNames.includes(clickedLetter)) {
-    //   let prev = TEXTAREA.value.slice(0, cursor)
-    //   let post = TEXTAREA.value.slice(cursor)
-    //   TEXTAREA.value = prev + clickedLetter + post;
-    //   console.log(cursor, cursor2)
-    // }
-
-    
-    if (!specialKeysNames.includes(clickedLetter)) TEXTAREA.value += clickedLetter;
-    if (clickedLetter === 'Backspace') TEXTAREA.value = TEXTAREA.value.slice(0, -1);
-    if (clickedLetter === '') TEXTAREA.value += ' ';
-    if (clickedLetter === 'Tab') TEXTAREA.value += '    ';
-
-    if (clickTarget.classList.contains('CapsLock')) clickTarget.classList.toggle('active')
-    else clickTarget.classList.add('active');
-
+    addLetter();
     specialKeysCheck();
     caseCheck();
   };
@@ -187,6 +190,10 @@ KEYBOARD.addEventListener('mouseup', function (event) {
   if (!clickTarget.classList.contains('CapsLock')) clickTarget.classList.remove('active');
   specialKeysCheck();
   caseCheck();
+});
+
+KEYBOARD.addEventListener('click', function (event) {
+  if (event.target.closest('.key')) TEXTAREA.focus();
 });
 
 let hoverTarget;
