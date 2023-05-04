@@ -160,8 +160,7 @@ function addLetter(target) {
 
 function LangCheck() {
   if (isCtrl && isAlt) {
-    localStorage.getItem('lang') === 'ru' ? localStorage.setItem('lang', 'en') : localStorage.setItem('lang', 'ru');
-    console.log(localStorage.getItem('lang'))
+    localStorage.getItem('lang') === 'en' ? localStorage.setItem('lang', 'ru') : localStorage.setItem('lang', 'en');
   }
   if (localStorage.getItem('lang') === 'en') {
     ALL_KEYS.forEach((key) => {
