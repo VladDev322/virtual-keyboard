@@ -16,13 +16,34 @@ BODY.innerHTML = `
 </div>`;
 
 const ROWS = document.querySelectorAll('.row');
+ROWS[0].innerHTML = insertCode(0, 14);
+ROWS[1].innerHTML = insertCode(14, 29);
+ROWS[2].innerHTML = insertCode(29, 42);
+ROWS[3].innerHTML = insertCode(42, 55);
+ROWS[4].innerHTML = insertCode(55, 64);
 
-function init() {
-  function insertCode(start, end) {
-    let out = '';
-    for (start; start < end; start++) {
-      out += `
-      <div class="keyboard--key key ${keys[start].code}">
+
+const specialKeysNames = ['Backspace', 'Tab', 'Delete', 'CapsLock', 'Enter', 'Shift', 'Ctrl', 'Win', 'Space', 'Alt'];
+const TEXTAREA = document.querySelector('.textarea');
+const KEYBOARD = document.querySelector('.keyboard');
+const ALL_KEYS = document.querySelectorAll('.key');
+const CAPS = document.querySelector('.CapsLock');
+const L_CTRL = document.querySelector('.ControlLeft');
+const R_CTRL = document.querySelector('.ControlRight');
+const L_ALT = document.querySelector('.AltLeft');
+const R_ALT = document.querySelector('.AltRight');
+const L_SHIFT = document.querySelector('.ShiftLeft');
+const R_SHIFT = document.querySelector('.ShiftRight');
+let isCaps = false;
+let isCtrl = false;
+let isAlt = false;
+let isShift = false;
+
+function insertCode(start, end) {
+  let out = '';
+  for (start; start < end; start++) {
+    out += `
+      <div class="key ${keys[start].code}">
         <span class="rus">
           <span class="caseDown">${keys[start].ru}</span>
           <span class="caseUp hidden">${keys[start].ruShift}</span>
@@ -37,36 +58,9 @@ function init() {
         </span>
       </div>
       `;
-    };
-    return out;
-  }
-
-  ROWS[0].innerHTML = insertCode(0, 14);
-  ROWS[1].innerHTML = insertCode(14, 29);
-  ROWS[2].innerHTML = insertCode(29, 42);
-  ROWS[3].innerHTML = insertCode(42, 55);
-  ROWS[4].innerHTML = insertCode(55, 64);
+  };
+  return out;
 }
-
-init();
-
-const specialKeysNames = ['Backspace', 'Tab', 'Delete', 'CapsLock', 'Enter', 'Shift', 'Ctrl', 'Win', 'Space', 'Alt'];
-const TEXTAREA = document.querySelector('.textarea');
-const KEYBOARD = document.querySelector('.keyboard');
-const ALL_KEYS = document.querySelectorAll('.key');
-const CAPS = document.querySelector('.CapsLock');
-const L_CTRL = document.querySelector('.ControlLeft');
-const R_CTRL = document.querySelector('.ControlRight');
-const L_ALT = document.querySelector('.AltLeft');
-const R_ALT = document.querySelector('.AltRight');
-const L_SHIFT = document.querySelector('.ShiftLeft');
-const R_SHIFT = document.querySelector('.ShiftRight');
-let isCaps = false;
-let isCapsActive = false;
-let isCtrl = false;
-let isAlt = false;
-let isShift = false;
-let isEng = false;
 
 function specialKeysCheck() {
   (CAPS.classList.contains('active')) ? isCaps = true : isCaps = false;
@@ -110,13 +104,14 @@ function caseCheck() {
   };
 };
 
-function addLetter() {
-  clickTarget = event.target.closest('.key');
-  let rusOrEng = clickTarget.querySelector('.rus:not(.hidden), .eng:not(.hidden)');
+function addLetter(target) {
+  let rusOrEng = target.querySelector('.rus:not(.hidden), .eng:not(.hidden)');
   let clickedLetter = Array.from(rusOrEng.children).find(child => !child.classList.contains('hidden')).innerText;
-  let cursor = TEXTAREA.selectionStart;
-  let prev = TEXTAREA.value.slice(0, cursor)
-  let post = TEXTAREA.value.slice(cursor)
+  let startPos = TEXTAREA.selectionStart;
+  let endPos = TEXTAREA.selectionEnd;
+  let prev = TEXTAREA.value.slice(0, startPos);
+  let post = TEXTAREA.value.slice(startPos);
+
   if (!specialKeysNames.includes(clickedLetter)) {
     TEXTAREA.value = prev + clickedLetter + post;
     TEXTAREA.selectionStart = prev.length + 1;
@@ -126,37 +121,49 @@ function addLetter() {
     TEXTAREA.value = prev + ' ' + post;
     TEXTAREA.selectionStart = prev.length + 1;
     TEXTAREA.selectionEnd = prev.length + 1;
-  } 
+  }
   if (clickedLetter === 'Backspace') {
-    prev = TEXTAREA.value.slice(0, cursor - 1);
-    TEXTAREA.selectionStart = prev.length - 1;
-    TEXTAREA.selectionEnd = prev.length - 1;
-    TEXTAREA.value = prev + post;
-    console.log('back')
-  } 
-  if (clickedLetter === 'Tab') TEXTAREA.value += '    ';
-  if (clickedLetter === 'Enter') TEXTAREA.value += '\n';
-  if (clickTarget.classList.contains('CapsLock')) clickTarget.classList.toggle('active')
-  else clickTarget.classList.add('active');
+    if (startPos != endPos) {
+      TEXTAREA.value = TEXTAREA.value.slice(0, startPos) + TEXTAREA.value.slice(endPos);
+      TEXTAREA.selectionStart = startPos;
+      TEXTAREA.selectionEnd = startPos;
+    } else if (startPos !== 0) {
+      TEXTAREA.value = TEXTAREA.value.slice(0, startPos - 1) + TEXTAREA.value.slice(endPos);
+      TEXTAREA.selectionStart = startPos - 1;
+      TEXTAREA.selectionEnd = startPos - 1;
+    }
+  }
+  if (clickedLetter === 'Delete') {
+    if (startPos != endPos) {
+      TEXTAREA.value = TEXTAREA.value.slice(0, startPos) + TEXTAREA.value.slice(endPos);
+      TEXTAREA.selectionStart = startPos;
+      TEXTAREA.selectionEnd = startPos;
+    } else if (startPos !== TEXTAREA.value.length) {
+      TEXTAREA.value = TEXTAREA.value.slice(0, startPos) + TEXTAREA.value.slice(endPos + 1, TEXTAREA.value.length);
+      TEXTAREA.selectionStart = startPos;
+      TEXTAREA.selectionEnd = startPos;
+    }
+  }
+  if (clickedLetter === 'Tab') {
+    TEXTAREA.value = prev + '    ' + post;
+    TEXTAREA.selectionStart = prev.length + 4;
+    TEXTAREA.selectionEnd = prev.length + 4;
+  }
+  if (clickedLetter === 'Enter') {
+    TEXTAREA.value = prev + '\n' + post;
+    TEXTAREA.selectionStart = prev.length + 1;
+    TEXTAREA.selectionEnd = prev.length + 1;
+  }
+  if (target.classList.contains('CapsLock')) target.classList.toggle('active')
+  else target.classList.add('active');
 }
 
-
-document.addEventListener('keydown', function (event) {
-  let key = document.querySelector(`.${event.code}`);
-  if (key.classList.contains('CapsLock')) key.classList.toggle('active')
-  else key.classList.add('active');
-  if (key.classList.contains('Tab') ||
-    key.classList.contains('AltLeft') ||
-    key.classList.contains('AltRight'))
-    event.preventDefault();
-
-  TEXTAREA.focus();
-
-  specialKeysCheck();
-  caseCheck();
-
-  if (isCtrl && isAlt) isEng = !isEng;
-  if (isEng) {
+function LangCheck() {
+  if (isCtrl && isAlt) {
+    localStorage.getItem('lang') === 'ru' ? localStorage.setItem('lang', 'en') : localStorage.setItem('lang', 'ru');
+    console.log(localStorage.getItem('lang'))
+  }
+  if (localStorage.getItem('lang') === 'en') {
     ALL_KEYS.forEach((key) => {
       key.querySelector('.rus').classList.add('hidden');
       key.querySelector('.eng').classList.remove('hidden');
@@ -168,8 +175,20 @@ document.addEventListener('keydown', function (event) {
       key.querySelector('.eng').classList.add('hidden');
     });
   };
-});
+}
 
+LangCheck();
+
+let pressTarget;
+document.addEventListener('keydown', function (event) {
+  pressTarget = document.querySelector(`.${event.code}`);
+  event.preventDefault();
+  TEXTAREA.focus();
+  addLetter(pressTarget);
+  specialKeysCheck();
+  caseCheck();
+  LangCheck();
+});
 document.addEventListener('keyup', function (event) {
   let key = document.querySelector(`.${event.code}`);
   if (!key.classList.contains('CapsLock')) key.classList.remove('active');
@@ -177,13 +196,14 @@ document.addEventListener('keyup', function (event) {
   caseCheck();
 });
 
-
 let clickTarget;
 KEYBOARD.addEventListener('mousedown', function (event) {
   if (event.target.closest('.key')) {
-    addLetter();
+    clickTarget = event.target.closest('.key');
+    addLetter(clickTarget);
     specialKeysCheck();
     caseCheck();
+    LangCheck();
   };
 });
 KEYBOARD.addEventListener('mouseup', function (event) {
@@ -191,9 +211,8 @@ KEYBOARD.addEventListener('mouseup', function (event) {
   specialKeysCheck();
   caseCheck();
 });
-
-KEYBOARD.addEventListener('click', function (event) {
-  if (event.target.closest('.key')) TEXTAREA.focus();
+document.addEventListener('click', function () {
+  TEXTAREA.focus();
 });
 
 let hoverTarget;
