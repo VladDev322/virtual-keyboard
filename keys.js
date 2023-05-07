@@ -1,21 +1,3 @@
-const keysNames = ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal',
-  'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash',
-  'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote', 'Enter',
-  'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'Space']
-
-const letters = ['ё', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'BackSpace',
-  'Tab', 'й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'Slash',
-  'CapsLock', 'ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'э', 'Enter',
-  'я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '.', 'Slash', 'Up',
-  'Ctrl', 'Win', 'Alt', 'Space', 'Alt', 'Left', 'Bottom', 'Right', 'Ctrl']
-
-const CharCodes = [1105, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 45, 61,
-  1081, 1094, 1091, 1082, 1077, 1085, 1075, 1096, 1097, 1079, 1093, 1098, 92,
-  1092, 1099, 1074, 1072, 1087, 1088, 1086, 1083, 1076, 1078, 1101, 13,
-  1103, 1095, 1089, 1084, 1080, 1090, 1100, 1073, 1102, 46,
-  32]
-
-
 const keys = [
   {
     code: 'Backquote',
@@ -719,8 +701,8 @@ const keys = [
     en: 'Ctrl',
     enShift: 'Ctrl',
     enCaps: 'Ctrl',
-    enShiftCaps: 'Ctrl'
-  }
-]
+    enShiftCaps: 'Ctrl',
+  },
+];
 
 export default keys;

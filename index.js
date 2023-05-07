@@ -1,4 +1,4 @@
-import keys from './keys.mjs';
+import keys from './keys.js';
 
 const BODY = document.querySelector('body');
 BODY.innerHTML = `
@@ -15,13 +15,35 @@ BODY.innerHTML = `
   <p class="info"> Для переключения языка комбинация:  ctrl + alt </p>
 </div>`;
 
+function insertCode(start, end) {
+  let out = '';
+  for (let n = start; n < end; n += 1) {
+    out += `
+      <div class="key ${keys[n].code}">
+        <span class="rus">
+          <span class="caseDown">${keys[n].ru}</span>
+          <span class="caseUp hidden">${keys[n].ruShift}</span>
+          <span class="caps hidden">${keys[n].ruCaps}</span>
+          <span class="ShiftCaps hidden">${keys[n].ruShiftCaps}</span>
+        </span>
+        <span class="eng hidden">
+          <span class="caseDown">${keys[n].en}</span>
+          <span class="caseUp hidden">${keys[n].enShift}</span>
+          <span class="caps hidden">${keys[n].enCaps}</span>
+          <span class="ShiftCaps hidden">${keys[n].enShiftCaps}</span>
+        </span>
+      </div>
+      `;
+  }
+  return out;
+}
+
 const ROWS = document.querySelectorAll('.row');
 ROWS[0].innerHTML = insertCode(0, 14);
 ROWS[1].innerHTML = insertCode(14, 29);
 ROWS[2].innerHTML = insertCode(29, 42);
 ROWS[3].innerHTML = insertCode(42, 55);
 ROWS[4].innerHTML = insertCode(55, 64);
-
 
 const specialKeysNames = ['Backspace', 'Tab', 'Delete', 'CapsLock', 'Enter', 'Shift', 'Ctrl', 'Win', 'Space', 'Alt'];
 const TEXTAREA = document.querySelector('.textarea');
@@ -39,34 +61,11 @@ let isCtrl = false;
 let isAlt = false;
 let isShift = false;
 
-function insertCode(start, end) {
-  let out = '';
-  for (start; start < end; start++) {
-    out += `
-      <div class="key ${keys[start].code}">
-        <span class="rus">
-          <span class="caseDown">${keys[start].ru}</span>
-          <span class="caseUp hidden">${keys[start].ruShift}</span>
-          <span class="caps hidden">${keys[start].ruCaps}</span>
-          <span class="ShiftCaps hidden">${keys[start].ruShiftCaps}</span>
-        </span>
-        <span class="eng hidden">
-          <span class="caseDown">${keys[start].en}</span>
-          <span class="caseUp hidden">${keys[start].enShift}</span>
-          <span class="caps hidden">${keys[start].enCaps}</span>
-          <span class="ShiftCaps hidden">${keys[start].enShiftCaps}</span>
-        </span>
-      </div>
-      `;
-  };
-  return out;
-}
-
 function specialKeysCheck() {
-  (CAPS.classList.contains('active')) ? isCaps = true : isCaps = false;
-  (L_CTRL.classList.contains('active') || R_CTRL.classList.contains('active')) ? isCtrl = true : isCtrl = false;
-  (L_ALT.classList.contains('active') || R_ALT.classList.contains('active')) ? isAlt = true : isAlt = false;
-  (L_SHIFT.classList.contains('active') || R_SHIFT.classList.contains('active')) ? isShift = true : isShift = false;
+  if (CAPS.classList.contains('active')) { isCaps = true; } else { isCaps = false; }
+  if (L_CTRL.classList.contains('active') || R_CTRL.classList.contains('active')) { isCtrl = true; } else { isCtrl = false; }
+  if (L_ALT.classList.contains('active') || R_ALT.classList.contains('active')) { isAlt = true; } else { isAlt = false; }
+  if (L_SHIFT.classList.contains('active') || R_SHIFT.classList.contains('active')) { isShift = true; } else { isShift = false; }
 }
 
 function caseCheck() {
@@ -77,40 +76,37 @@ function caseCheck() {
       key.querySelectorAll('.caseDown').forEach((elem) => elem.classList.add('hidden'));
       key.querySelectorAll('.caps').forEach((elem) => elem.classList.add('hidden'));
     });
-  }
-  else if (isShift) {
+  } else if (isShift) {
     ALL_KEYS.forEach((key) => {
       key.querySelectorAll('.caseUp').forEach((elem) => elem.classList.remove('hidden'));
       key.querySelectorAll('.caseDown').forEach((elem) => elem.classList.add('hidden'));
       key.querySelectorAll('.caps').forEach((elem) => elem.classList.add('hidden'));
       key.querySelectorAll('.ShiftCaps').forEach((elem) => elem.classList.add('hidden'));
     });
-  }
-  else if (isCaps) {
+  } else if (isCaps) {
     ALL_KEYS.forEach((key) => {
       key.querySelectorAll('.caps').forEach((elem) => elem.classList.remove('hidden'));
       key.querySelectorAll('.caseDown').forEach((elem) => elem.classList.add('hidden'));
       key.querySelectorAll('.caseUp').forEach((elem) => elem.classList.add('hidden'));
       key.querySelectorAll('.ShiftCaps').forEach((elem) => elem.classList.add('hidden'));
     });
-  }
-  else {
+  } else {
     ALL_KEYS.forEach((key) => {
       key.querySelectorAll('.caseDown').forEach((elem) => elem.classList.remove('hidden'));
       key.querySelectorAll('.ShiftCaps').forEach((elem) => elem.classList.add('hidden'));
       key.querySelectorAll('.caseUp').forEach((elem) => elem.classList.add('hidden'));
       key.querySelectorAll('.caps').forEach((elem) => elem.classList.add('hidden'));
     });
-  };
-};
+  }
+}
 
 function addLetter(target) {
-  let rusOrEng = target.querySelector('.rus:not(.hidden), .eng:not(.hidden)');
-  let clickedLetter = Array.from(rusOrEng.children).find(child => !child.classList.contains('hidden')).innerText;
-  let startPos = TEXTAREA.selectionStart;
-  let endPos = TEXTAREA.selectionEnd;
-  let prev = TEXTAREA.value.slice(0, startPos);
-  let post = TEXTAREA.value.slice(startPos);
+  const rusOrEng = target.querySelector('.rus:not(.hidden), .eng:not(.hidden)');
+  const clickedLetter = Array.from(rusOrEng.children).find((child) => !child.classList.contains('hidden')).innerText;
+  const startPos = TEXTAREA.selectionStart;
+  const endPos = TEXTAREA.selectionEnd;
+  const prev = TEXTAREA.value.slice(0, startPos);
+  const post = TEXTAREA.value.slice(startPos);
 
   if (!specialKeysNames.includes(clickedLetter)) {
     TEXTAREA.value = prev + clickedLetter + post;
@@ -118,12 +114,12 @@ function addLetter(target) {
     TEXTAREA.selectionEnd = prev.length + 1;
   }
   if (clickedLetter === '') {
-    TEXTAREA.value = prev + ' ' + post;
+    TEXTAREA.value = `${prev} ${post}`;
     TEXTAREA.selectionStart = prev.length + 1;
     TEXTAREA.selectionEnd = prev.length + 1;
   }
   if (clickedLetter === 'Backspace') {
-    if (startPos != endPos) {
+    if (startPos !== endPos) {
       TEXTAREA.value = TEXTAREA.value.slice(0, startPos) + TEXTAREA.value.slice(endPos);
       TEXTAREA.selectionStart = startPos;
       TEXTAREA.selectionEnd = startPos;
@@ -134,52 +130,51 @@ function addLetter(target) {
     }
   }
   if (clickedLetter === 'Delete') {
-    if (startPos != endPos) {
+    if (startPos !== endPos) {
       TEXTAREA.value = TEXTAREA.value.slice(0, startPos) + TEXTAREA.value.slice(endPos);
       TEXTAREA.selectionStart = startPos;
       TEXTAREA.selectionEnd = startPos;
     } else if (startPos !== TEXTAREA.value.length) {
-      TEXTAREA.value = TEXTAREA.value.slice(0, startPos) + TEXTAREA.value.slice(endPos + 1, TEXTAREA.value.length);
+      TEXTAREA.value = prev + TEXTAREA.value.slice(endPos + 1, TEXTAREA.value.length);
       TEXTAREA.selectionStart = startPos;
       TEXTAREA.selectionEnd = startPos;
     }
   }
   if (clickedLetter === 'Tab') {
-    TEXTAREA.value = prev + '    ' + post;
+    TEXTAREA.value = `${prev}    ${post}`;
     TEXTAREA.selectionStart = prev.length + 4;
     TEXTAREA.selectionEnd = prev.length + 4;
   }
   if (clickedLetter === 'Enter') {
-    TEXTAREA.value = prev + '\n' + post;
+    TEXTAREA.value = `${prev}\n${post}`;
     TEXTAREA.selectionStart = prev.length + 1;
     TEXTAREA.selectionEnd = prev.length + 1;
   }
-  if (target.classList.contains('CapsLock')) target.classList.toggle('active')
+  if (target.classList.contains('CapsLock')) target.classList.toggle('active');
   else target.classList.add('active');
 }
 
 function LangCheck() {
   if (isCtrl && isAlt) {
-    localStorage.getItem('lang') === 'en' ? localStorage.setItem('lang', 'ru') : localStorage.setItem('lang', 'en');
+    if (localStorage.getItem('lang') === 'en') { localStorage.setItem('lang', 'ru'); } else { localStorage.setItem('lang', 'en'); }
   }
   if (localStorage.getItem('lang') === 'en') {
     ALL_KEYS.forEach((key) => {
       key.querySelector('.rus').classList.add('hidden');
       key.querySelector('.eng').classList.remove('hidden');
     });
-  }
-  else {
+  } else {
     ALL_KEYS.forEach((key) => {
       key.querySelector('.rus').classList.remove('hidden');
       key.querySelector('.eng').classList.add('hidden');
     });
-  };
+  }
 }
 
 LangCheck();
 
 let pressTarget;
-document.addEventListener('keydown', function (event) {
+document.addEventListener('keydown', (event) => {
   pressTarget = document.querySelector(`.${event.code}`);
   event.preventDefault();
   TEXTAREA.focus();
@@ -188,41 +183,41 @@ document.addEventListener('keydown', function (event) {
   caseCheck();
   LangCheck();
 });
-document.addEventListener('keyup', function (event) {
-  let key = document.querySelector(`.${event.code}`);
+document.addEventListener('keyup', (event) => {
+  const key = document.querySelector(`.${event.code}`);
   if (!key.classList.contains('CapsLock')) key.classList.remove('active');
   specialKeysCheck();
   caseCheck();
 });
 
 let clickTarget;
-KEYBOARD.addEventListener('mousedown', function (event) {
+KEYBOARD.addEventListener('mousedown', (event) => {
   if (event.target.closest('.key')) {
     clickTarget = event.target.closest('.key');
     addLetter(clickTarget);
     specialKeysCheck();
     caseCheck();
     LangCheck();
-  };
+  }
 });
-KEYBOARD.addEventListener('mouseup', function (event) {
+KEYBOARD.addEventListener('mouseup', () => {
   if (!clickTarget.classList.contains('CapsLock')) clickTarget.classList.remove('active');
   specialKeysCheck();
   caseCheck();
 });
-document.addEventListener('click', function () {
+document.addEventListener('click', () => {
   TEXTAREA.focus();
 });
 
 let hoverTarget;
-document.addEventListener('mouseover', function (event) {
+document.addEventListener('mouseover', (event) => {
   if (event.target.closest('.key')) {
     hoverTarget = event.target.closest('.key');
     hoverTarget.classList.add('hover-effect');
   }
-})
-document.addEventListener('mouseout', function (event) {
+});
+document.addEventListener('mouseout', (event) => {
   if (event.target.closest('.key')) {
     hoverTarget.classList.remove('hover-effect');
   }
-})
+});
