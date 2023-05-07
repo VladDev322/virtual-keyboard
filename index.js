@@ -1,4 +1,4 @@
-import keys from './keys';
+import keys from './keys.js';
 
 const BODY = document.querySelector('body');
 BODY.innerHTML = `
@@ -14,6 +14,36 @@ BODY.innerHTML = `
   <p class="info"> Клавиатура создана в операционной системе Windows </p>
   <p class="info"> Для переключения языка комбинация:  ctrl + alt </p>
 </div>`;
+
+function insertCode(start, end) {
+  let out = '';
+  for (let n = start; n < end; n += 1) {
+    out += `
+      <div class="key ${keys[n].code}">
+        <span class="rus">
+          <span class="caseDown">${keys[n].ru}</span>
+          <span class="caseUp hidden">${keys[n].ruShift}</span>
+          <span class="caps hidden">${keys[n].ruCaps}</span>
+          <span class="ShiftCaps hidden">${keys[n].ruShiftCaps}</span>
+        </span>
+        <span class="eng hidden">
+          <span class="caseDown">${keys[n].en}</span>
+          <span class="caseUp hidden">${keys[n].enShift}</span>
+          <span class="caps hidden">${keys[n].enCaps}</span>
+          <span class="ShiftCaps hidden">${keys[n].enShiftCaps}</span>
+        </span>
+      </div>
+      `;
+  }
+  return out;
+}
+
+const ROWS = document.querySelectorAll('.row');
+ROWS[0].innerHTML = insertCode(0, 14);
+ROWS[1].innerHTML = insertCode(14, 29);
+ROWS[2].innerHTML = insertCode(29, 42);
+ROWS[3].innerHTML = insertCode(42, 55);
+ROWS[4].innerHTML = insertCode(55, 64);
 
 const specialKeysNames = ['Backspace', 'Tab', 'Delete', 'CapsLock', 'Enter', 'Shift', 'Ctrl', 'Win', 'Space', 'Alt'];
 const TEXTAREA = document.querySelector('.textarea');
@@ -31,34 +61,11 @@ let isCtrl = false;
 let isAlt = false;
 let isShift = false;
 
-function insertCode(start, end) {
-  let out = '';
-  for (start; start < end; start++) {
-    out += `
-      <div class="key ${keys[start].code}">
-        <span class="rus">
-          <span class="caseDown">${keys[start].ru}</span>
-          <span class="caseUp hidden">${keys[start].ruShift}</span>
-          <span class="caps hidden">${keys[start].ruCaps}</span>
-          <span class="ShiftCaps hidden">${keys[start].ruShiftCaps}</span>
-        </span>
-        <span class="eng hidden">
-          <span class="caseDown">${keys[start].en}</span>
-          <span class="caseUp hidden">${keys[start].enShift}</span>
-          <span class="caps hidden">${keys[start].enCaps}</span>
-          <span class="ShiftCaps hidden">${keys[start].enShiftCaps}</span>
-        </span>
-      </div>
-      `;
-  }
-  return out;
-}
-
 function specialKeysCheck() {
-  (CAPS.classList.contains('active')) ? isCaps = true : isCaps = false;
-  (L_CTRL.classList.contains('active') || R_CTRL.classList.contains('active')) ? isCtrl = true : isCtrl = false;
-  (L_ALT.classList.contains('active') || R_ALT.classList.contains('active')) ? isAlt = true : isAlt = false;
-  (L_SHIFT.classList.contains('active') || R_SHIFT.classList.contains('active')) ? isShift = true : isShift = false;
+  if (CAPS.classList.contains('active')) { isCaps = true; } else { isCaps = false; }
+  if (L_CTRL.classList.contains('active') || R_CTRL.classList.contains('active')) { isCtrl = true; } else { isCtrl = false; }
+  if (L_ALT.classList.contains('active') || R_ALT.classList.contains('active')) { isAlt = true; } else { isAlt = false; }
+  if (L_SHIFT.classList.contains('active') || R_SHIFT.classList.contains('active')) { isShift = true; } else { isShift = false; }
 }
 
 function caseCheck() {
@@ -112,7 +119,7 @@ function addLetter(target) {
     TEXTAREA.selectionEnd = prev.length + 1;
   }
   if (clickedLetter === 'Backspace') {
-    if (startPos != endPos) {
+    if (startPos !== endPos) {
       TEXTAREA.value = TEXTAREA.value.slice(0, startPos) + TEXTAREA.value.slice(endPos);
       TEXTAREA.selectionStart = startPos;
       TEXTAREA.selectionEnd = startPos;
@@ -123,12 +130,12 @@ function addLetter(target) {
     }
   }
   if (clickedLetter === 'Delete') {
-    if (startPos != endPos) {
+    if (startPos !== endPos) {
       TEXTAREA.value = TEXTAREA.value.slice(0, startPos) + TEXTAREA.value.slice(endPos);
       TEXTAREA.selectionStart = startPos;
       TEXTAREA.selectionEnd = startPos;
     } else if (startPos !== TEXTAREA.value.length) {
-      TEXTAREA.value = TEXTAREA.value.slice(0, startPos) + TEXTAREA.value.slice(endPos + 1, TEXTAREA.value.length);
+      TEXTAREA.value = prev + TEXTAREA.value.slice(endPos + 1, TEXTAREA.value.length);
       TEXTAREA.selectionStart = startPos;
       TEXTAREA.selectionEnd = startPos;
     }
@@ -149,7 +156,7 @@ function addLetter(target) {
 
 function LangCheck() {
   if (isCtrl && isAlt) {
-    localStorage.getItem('lang') === 'en' ? localStorage.setItem('lang', 'ru') : localStorage.setItem('lang', 'en');
+    if (localStorage.getItem('lang') === 'en') { localStorage.setItem('lang', 'ru'); } else { localStorage.setItem('lang', 'en'); }
   }
   if (localStorage.getItem('lang') === 'en') {
     ALL_KEYS.forEach((key) => {
@@ -161,15 +168,8 @@ function LangCheck() {
       key.querySelector('.rus').classList.remove('hidden');
       key.querySelector('.eng').classList.add('hidden');
     });
-  };
-};
-
-const ROWS = document.querySelectorAll('.row');
-ROWS[0].innerHTML = insertCode(0, 14);
-ROWS[1].innerHTML = insertCode(14, 29);
-ROWS[2].innerHTML = insertCode(29, 42);
-ROWS[3].innerHTML = insertCode(42, 55);
-ROWS[4].innerHTML = insertCode(55, 64);
+  }
+}
 
 LangCheck();
 
@@ -200,7 +200,7 @@ KEYBOARD.addEventListener('mousedown', (event) => {
     LangCheck();
   }
 });
-KEYBOARD.addEventListener('mouseup', (event) => {
+KEYBOARD.addEventListener('mouseup', () => {
   if (!clickTarget.classList.contains('CapsLock')) clickTarget.classList.remove('active');
   specialKeysCheck();
   caseCheck();
@@ -214,10 +214,10 @@ document.addEventListener('mouseover', (event) => {
   if (event.target.closest('.key')) {
     hoverTarget = event.target.closest('.key');
     hoverTarget.classList.add('hover-effect');
-  };
+  }
 });
 document.addEventListener('mouseout', (event) => {
   if (event.target.closest('.key')) {
     hoverTarget.classList.remove('hover-effect');
-  };
+  }
 });
